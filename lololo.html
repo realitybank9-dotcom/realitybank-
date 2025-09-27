@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reality Bank - Transfers</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f1724;
+      color: #e6eef8;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #1a2540;
+      color: #e6eef8;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 15px 20px;
+    }
+    header img {
+      height: 40px;
+      margin-right: 10px;
+    }
+    .balance {
+      font-size: 1.1rem;
+      font-weight: bold;
+    }
+    .container {
+      max-width: 900px;
+      margin: 30px auto;
+      background: #1e293b;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0px 4px 10px rgba(0,0,0,0.5);
+    }
+    h2, h1 {
+      color: #e6eef8;
+      margin-bottom: 15px;
+    }
+    .tabs {
+      display: flex;
+      margin-bottom: 20px;
+    }
+    .tab {
+      flex: 1;
+      text-align: center;
+      padding: 12px;
+      cursor: pointer;
+      border: 1px solid #334155;
+      background: #293548;
+      color: #e6eef8;
+    }
+    .tab.active {
+      background: #475569;
+      font-weight: bold;
+    }
+    .form-section {
+      display: none;
+    }
+    .form-section.active {
+      display: block;
+    }
+    label {
+      display: block;
+      margin: 10px 0 5px;
+      font-weight: bold;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      border: 1px solid #475569;
+      font-size: 1rem;
+      background: #0f1724;
+      color: #e6eef8;
+    }
+    button {
+      background: #334155;
+      color: #e6eef8;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #475569;
+    }
+    .country-list a {
+      display: block;
+      padding: 10px;
+      margin: 5px 0;
+      background: #293548;
+      text-decoration: none;
+      color: #e6eef8;
+      border-radius: 5px;
+      border: 1px solid #334155;
+      cursor: pointer;
+    }
+    .bank-list {
+      display: none;
+      margin-top: 10px;
+      padding: 10px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 5px;
+    }
+    .bank-form {
+      margin-top: 15px;
+      display: none;
+    }
+    /* Review Page */
+    #reviewPage { display: none; }
+    #transaction-details {
+      background: #293548;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 15px 0;
+    }
+    .actions {
+      display: flex;
+      justify-content: space-between;
+    }
+    .message {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #1e293b;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0px 4px 10px rgba(0,0,0,0.6);
+      font-size: 1.2rem;
+      font-weight: bold;
+      text-align: center;
+      color: #e6eef8;
+      display: none;
+      z-index: 1000;
+    }
+    /* Transaction History */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    table th, table td {
+      border: 1px solid #334155;
+      padding: 8px;
+      text-align: left;
+    }
+    table th {
+      background: #293548;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div style="display:flex;align-items:center;">
+    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRwdE8OReGwR9Dk6iqBy7qdhnwuFEAVtsBtyA&s" alt="Reality Bank Logo">
+    <h1>Reality Bank</h1>
+  </div>
+  <div class="balance">Balance: $<span id="balance">10000</span></div>
+</header>
+
+<!-- Transfer Page -->
+<div class="container" id="transferPage">
+  <h2>Make a Transfer</h2>
+
+  <div class="tabs">
+    <div class="tab active" onclick="showTab('local', event)">Local Transfer</div>
+    <div class="tab" onclick="showTab('international', event)">International Transfer</div>
+  </div>
+
+  <!-- Local Transfer -->
+  <div id="local" class="form-section active">
+    <form id="localForm" onsubmit="goToReview(event, 'Local')">
+      <label for="local-bank">Select Bank</label>
+      <select id="local-bank" required>
+        <option value="">-- Select Bank --</option>
+        <option>JPMorgan Chase</option>
+        <option>Bank of America</option>
+      </select>
+
+      <label for="local-account">Account Number</label>
+      <input type="text" id="local-account" placeholder="Enter Account Number" oninput="detectAccountName(this.value, 'local-recipient')" required>
+
+      <label for="local-recipient">Recipient Name</label>
+      <input type="text" id="local-recipient" placeholder="Auto-filled Recipient Name" readonly>
+
+      <label for="local-amount">Amount</label>
+      <input type="number" id="local-amount" placeholder="Enter Amount" required>
+
+      <button type="submit">Send Money</button>
+    </form>
+  </div>
+
+  <!-- International Transfer -->
+  <div id="international" class="form-section">
+    <p>Select a country to proceed with your transfer:</p>
+    <div class="country-list">
+      <a onclick="toggleBanks('ghanaBanks')">🇬🇭 Ghana</a>
+      <div id="ghanaBanks" class="bank-list">
+        <a onclick="showBankForm('GCB Bank Limited')">GCB Bank Limited</a>
+        <a onclick="showBankForm('MTN Mobile Money (MoMo)')">MTN Mobile Money (MoMo)</a>
+      </div>
+    </div>
+
+    <div id="bankForm" class="bank-form">
+      <h3 id="selectedBank"></h3>
+      <form id="intForm" onsubmit="goToReview(event, 'International')">
+        <label for="int-account">Account Number</label>
+        <input type="text" id="int-account" placeholder="Enter Account Number" oninput="detectAccountName(this.value, 'recipient-name')" required>
+
+        <label for="recipient-name">Recipient Name</label>
+        <input type="text" id="recipient-name" placeholder="Auto-filled Recipient Name" readonly>
+
+        <label for="int-amount">Amount</label>
+        <input type="number" id="int-amount" placeholder="Enter Amount" required>
+
+        <button type="submit">Send Money</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Review Page -->
+<div class="container" id="reviewPage">
+  <h1>Review Your Transaction</h1>
+  <div id="transaction-details"></div>
+  <div class="actions">
+    <button onclick="confirmTransaction()">Confirm Transaction</button>
+    <button onclick="editTransaction()">Edit Details</button>
+  </div>
+</div>
+
+<!-- Transaction History -->
+<div class="container" id="historyPage">
+  <h2>Recent Transactions</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Description</th>
+        <th>Type</th>
+        <th>Amount</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody id="historyBody">
+      <tr>
+        <td>2025-01-20</td>
+        <td>Purchase</td>
+        <td>debit</td>
+        <td>-$3278.07</td>
+        <td>Successful</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Final Message -->
+<div class="message" id="successMessage">
+  ✅ Transaction submitted successfully!
+</div>
+
+<script>
+  let balance = 10000;
+  let savedTransaction = null;
+
+  const accounts = {
+    "123456": "John Doe",
+    "654321": "Mary Johnson",
+    "111222": "Kwame Boateng",
+    "222333": "Ama Serwaa"
+  };
+
+  function showTab(tabId, event) {
+    document.querySelectorAll(".tab").forEach(tab => tab.classList.remove("active"));
+    document.querySelectorAll(".form-section").forEach(section => section.classList.remove("active"));
+    document.getElementById(tabId).classList.add("active");
+    event.target.classList.add("active");
+  }
+
+  function toggleBanks(bankListId) {
+    const bankList = document.getElementById(bankListId);
+    bankList.style.display = (bankList.style.display === "block") ? "none" : "block";
+  }
+
+  function showBankForm(bankName) {
+    document.getElementById("selectedBank").textContent = "Transfer to " + bankName;
+    document.getElementById("bankForm").style.display = "block";
+  }
+
+  function detectAccountName(accountNumber, recipientFieldId) {
+    const recipientField = document.getElementById(recipientFieldId);
+    recipientField.value = accounts[accountNumber] || "";
+  }
+
+  function goToReview(event, type) {
+    event.preventDefault();
+    let bank, account, recipient, amount;
+
+    if (type === "Local") {
+      bank = document.getElementById("local-bank").value;
+      account = document.getElementById("local-account").value;
+      recipient = document.getElementById("local-recipient").value;
+      amount = document.getElementById("local-amount").value;
+    } else {
+      bank = document.getElementById("selectedBank").textContent.replace("Transfer to ", "");
+      account = document.getElementById("int-account").value;
+      recipient = document.getElementById("recipient-name").value;
+      amount = document.getElementById("int-amount").value;
+    }
+
+    savedTransaction = { type, bank, account, recipient, amount };
+
+    document.getElementById("transaction-details").innerHTML = `
+      <p><strong>Transfer Type:</strong> ${type}</p>
+      <p><strong>Bank:</strong> ${bank}</p>
+      <p><strong>Account Number:</strong> ${account}</p>
+      <p><strong>Recipient Name:</strong> ${recipient}</p>
+      <p><strong>Amount:</strong> $${amount}</p>
+    `;
+
+    document.getElementById("transferPage").style.display = "none";
+    document.getElementById("reviewPage").style.display = "block";
+  }
+
+  function confirmTransaction() {
+    const { bank, account, recipient, amount } = savedTransaction;
+    balance -= parseFloat(amount);
+    document.getElementById("balance").textContent = balance.toFixed(2);
+
+    const row = document.createElement("tr");
+    const date = new Date().toISOString().split("T")[0];
+    row.innerHTML = `
+      <td>${date}</td>
+      <td>Transfer to ${recipient} (${bank})</td>
+      <td>debit</td>
+      <td>-$${amount}</td>
+      <td>Pending</td>
+    `;
+    document.getElementById("historyBody").prepend(row);
+
+    document.getElementById("reviewPage").style.display = "none";
+    document.getElementById("successMessage").style.display = "block";
+    setTimeout(() => {
+      document.getElementById("successMessage").style.display = "none";
+      document.getElementById("transferPage").style.display = "block";
+    }, 3000);
+  }
+
+  function editTransaction() {
+    if (!savedTransaction) return;
+    const { type, bank, account, recipient, amount } = savedTransaction;
+
+    if (type === "Local") {
+      document.getElementById("local-bank").value = bank;
+      document.getElementById("local-account").value = account;
+      document.getElementById("local-recipient").value = recipient;
+      document.getElementById("local-amount").value = amount;
+      showTab("local", {target: document.querySelector(".tab:first-child")});
+    } else {
+      document.getElementById("selectedBank").textContent = "Transfer to " + bank;
+      document.getElementById("int-account").value = account;
+      document.getElementById("recipient-name").value = recipient;
+      document.getElementById("int-amount").value = amount;
+      document.getElementById("bankForm").style.display = "block";
+      showTab("international", {target: document.querySelectorAll(".tab")[1]});
+    }
+
+    document.getElementById("reviewPage").style.display = "none";
+    document.getElementById("transferPage").style.display = "block";
+  }
+</script>
+
+</body>
+</html>
