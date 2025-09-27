@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Reality Bank - Login</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f1724;
+      color: #e6eef8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+      border-radius: 12px;
+      padding: 28px;
+      width: 340px;
+      box-shadow: 0 8px 30px rgba(2,6,23,0.6);
+    }
+    h1 { margin: 0 0 16px 0; font-size: 20px; color: #fff; }
+    label { display:block; margin-top:12px; font-size:13px; color:#cbd5e1; }
+    input[type="text"], input[type="password"] {
+      width:100%;
+      padding:10px 12px;
+      margin-top:6px;
+      border-radius:8px;
+      border:1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.02);
+      color: #e6eef8;
+      box-sizing:border-box;
+    }
+    button {
+      margin-top:18px;
+      width:100%;
+      padding:10px 12px;
+      border-radius:8px;
+      border: none;
+      background:#0ea5a4;
+      color:#022;
+      font-weight:600;
+      cursor:pointer;
+    }
+    #message { margin-top:12px; font-size:14px; min-height:18px; }
+    .small { font-size:12px; color:#94a3b8; margin-top:8px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Reality Bank — Login</h1>
+
+    <form id="loginForm" autocomplete="off">
+      <label for="username">Username</label>
+      <input id="username" name="username" type="text" required />
+
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" required />
+
+      <button type="submit">Login</button>
+    </form>
+
+    <div id="message" role="status" aria-live="polite"></div>
+    <div class="small">Note: This demo uses client-side validation only — not secure for production.</div>
+  </div>
+
+  <script>
+    // Allowed demo credentials (client-side check)
+    const DEMO_USERNAME = 'osteen3352';
+    const DEMO_PASSWORD = 'Evidence52';
+
+    // Target redirect URL (exact URL you provided)
+    const DASHBOARD_URL = 'https://realitybank9-dotcom.github.io/realitybank-/my%20dashboard%20for%20bank.html';
+
+    const usernameEl = document.getElementById('username');
+    const passwordEl = document.getElementById('password');
+    const messageDiv = document.getElementById('message');
+    const loginForm = document.getElementById('loginForm');
+
+    // Called when user submits the form (keeps existing behavior)
+    loginForm.addEventListener('submit', function(event) {
+      event.preventDefault(); // Prevent default form submission
+
+      const username = usernameEl.value.trim();
+      const password = passwordEl.value;
+
+      if (username === DEMO_USERNAME && password === DEMO_PASSWORD) {
+        showSuccessAndRedirect('Login successful! Redirecting...');
+      } else {
+        showError('Invalid username or password.');
+      }
+    });
+
+    // Also watch input fields and redirect automatically if both match
+    function checkCredentialsAndMaybeRedirect() {
+      const u = usernameEl.value.trim();
+      const p = passwordEl.value;
+
+      if (u === DEMO_USERNAME && p === DEMO_PASSWORD) {
+        // Provide immediate feedback then redirect
+        showSuccessAndRedirect('Credentials detected — redirecting now...');
+      } else {
+        // Clear any success state if they changed input
+        messageDiv.textContent = '';
+        messageDiv.style.color = '';
+      }
+    }
+
+    // Small helper to set success message and redirect shortly
+    let redirectTimeout = null;
+    function showSuccessAndRedirect(text) {
+      clearTimeout(redirectTimeout);
+      messageDiv.textContent = text;
+      messageDiv.style.color = 'limegreen';
+      // short delay to let the user see the message (300ms)
+      redirectTimeout = setTimeout(function() {
+        window.location.href = DASHBOARD_URL;
+      }, 300);
+    }
+
+    function showError(text) {
+      clearTimeout(redirectTimeout);
+      messageDiv.textContent = text;
+      messageDiv.style.color = '#ff6b6b';
+    }
+
+    // attach input listeners to both fields
+    usernameEl.addEventListener('input', checkCredentialsAndMaybeRedirect);
+    passwordEl.addEventListener('input', checkCredentialsAndMaybeRedirect);
+  </script>
+</body>
+</html>
